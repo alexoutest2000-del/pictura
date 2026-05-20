@@ -7,11 +7,6 @@ use crate::viewer::ImageInfo;
 /// Supported image formats.
 const SUPPORTED_EXTENSIONS: &[&str] = &["png", "jpg", "jpeg"];
 
-/// Maximum memory budget for decoded images (500 MB).
-/// Dimensions are checked before full decode — if width × height × 4 > max,
-/// the image is rejected.
-const MAX_DECODE_BYTES: u64 = 500 * 1024 * 1024;
-
 /// Scan a directory (recursively) for supported image files.
 /// Returns paths sorted alphabetically.
 pub fn scan_directory(root: &str) -> Result<Vec<std::path::PathBuf>> {

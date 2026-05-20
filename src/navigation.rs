@@ -15,6 +15,7 @@ impl FileList {
         self.files.len()
     }
 
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.files.is_empty()
     }
@@ -23,6 +24,7 @@ impl FileList {
         self.cursor
     }
 
+    #[allow(dead_code)]
     pub fn current_path(&self) -> Option<&Path> {
         self.files.get(self.cursor).map(|p| p.as_path())
     }
@@ -50,6 +52,7 @@ impl FileList {
     }
 
     /// Jump to a specific index. Clamped to valid range.
+    #[allow(dead_code)]
     pub fn go_to(&mut self, index: usize) -> Option<&Path> {
         if self.files.is_empty() {
             return None;
