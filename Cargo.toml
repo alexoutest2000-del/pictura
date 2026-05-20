@@ -1,0 +1,39 @@
+[package]
+name = "pictura"
+version = "0.1.0"
+edition = "2021"
+description = "A fast, minimal image viewer for Linux"
+license = "MIT"
+repository = "https://github.com/user/pictura"
+readme = "README.md"
+keywords = ["image", "viewer", "gui", "slideshow"]
+categories = ["gui", "multimedia::images"]
+
+[dependencies]
+egui = "0.29"
+eframe = "0.29"
+image = "0.25"
+walkdir = "2"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+clap = { version = "4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+thiserror = "2"
+
+[dev-dependencies]
+insta = "1"
+proptest = "1"
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = 3
+
+[[bench]]
+name = "decode"
+harness = false

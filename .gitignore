@@ -1,0 +1,18 @@
+# Build
+/target/
+/debug/
+/release/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Crash logs (generated at runtime)
+crashes/
