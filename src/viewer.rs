@@ -1,5 +1,6 @@
 use egui::{ColorImage, TextureHandle, TextureOptions};
 use std::path::Path;
+use std::time::Instant;
 
 use crate::loader;
 
@@ -13,10 +14,12 @@ pub struct ImageInfo {
 
 /// The image viewer state — display, zoom, pan.
 pub struct Viewer {
-    /// Texture handle for the currently loaded image (egui GPU texture).
+    /// GPU texture handle for the currently loaded image.
     pub texture_id: Option<TextureHandle>,
     /// Metadata about the loaded image.
     pub image_info: Option<ImageInfo>,
+    /// Pending pixel data waiting to be uploaded to GPU on next frame.
+    pending_image: Option<ColorImage>,
     /// Current zoom level (1.0 = 100%).
     pub zoom: f32,
     /// Whether to fit the image to the window.
@@ -36,6 +39,7 @@ impl Default for Viewer {
         Self {
             texture_id: None,
             image_info: None,
+            pending_image: None,
             zoom: 1.0,
             zoom_fit: true,
             pan: egui::Vec2::ZERO,
@@ -48,22 +52,41 @@ impl Default for Viewer {
 }
 
 impl Viewer {
-    /// Load an image from disk and upload it as a GPU texture.
+    /// Decode an image from disk and queue it for GPU upload on next frame.
+    /// The actual texture is created in `upload_pending()` which has access to
+    /// the egui Context.
     pub fn load(&mut self, path: &Path) {
-        let result = loader::decode_image(path, self.max_memory);
-        match result {
+        match loader::decode_image(path, self.max_memory) {
             Ok((image, info)) => {
-                // Upload to GPU — will be handled in egui context in the real impl
-                // For now, store metadata; texture upload happens in ui()
+                let rgba = image.to_rgba8();
+                let size = [info.width as usize, info.height as usize];
+                let pixels = rgba.into_raw();
+
+                let color_image = ColorImage::from_rgba_unmultiplied(size, &pixels);
+
                 self.image_info = Some(info);
-                // TODO: actually create egui ColorImage and upload to TextureHandle
-                let _ = image; // consumed when texture is created
-                self.zoom_fit = true; // Reset zoom on new image
+                self.pending_image = Some(color_image);
+                self.zoom_fit = true; // Reset on new image
+                self.pan = egui::Vec2::ZERO;
             }
             Err(e) => {
                 tracing::warn!("Failed to load {}: {e}", path.display());
                 self.image_info = None;
+                self.pending_image = None;
             }
+        }
+    }
+
+    /// Upload any pending decoded image to the GPU.
+    /// Call this from `update()` where egui::Context is available.
+    pub fn upload_pending(&mut self, ctx: &egui::Context) {
+        if let Some(color_image) = self.pending_image.take() {
+            let texture = ctx.load_texture(
+                "pictura-current",
+                color_image,
+                TextureOptions::LINEAR,
+            );
+            self.texture_id = Some(texture);
         }
     }
 
@@ -74,7 +97,6 @@ impl Viewer {
 
         if let Some(ref texture) = self.texture_id {
             if let Some(ref info) = self.image_info {
-                // Calculate display size
                 let img_size = egui::Vec2::new(info.width as f32, info.height as f32);
 
                 let display_size = if self.zoom_fit {
@@ -86,7 +108,6 @@ impl Viewer {
                     img_size * self.zoom
                 };
 
-                // Center the image in available space
                 let offset = (available - display_size) * 0.5 + self.pan;
 
                 ui.put(
@@ -98,21 +119,27 @@ impl Viewer {
                 );
             }
         } else {
-            // No image loaded — placeholder
             ui.centered_and_justified(|ui| {
                 ui.label("No image");
             });
         }
 
-        // Return the full area as interactive for scrolling/dragging
         ui.interact(ui.max_rect(), ui.next_auto_id(), egui::Sense::click_and_drag())
     }
 
     pub fn zoom_in(&mut self) {
+        self.zoom_fit = false;
         self.zoom = (self.zoom + self.zoom_step).min(self.max_zoom);
     }
 
     pub fn zoom_out(&mut self) {
+        self.zoom_fit = false;
         self.zoom = (self.zoom - self.zoom_step).max(self.min_zoom);
+    }
+
+    pub fn reset_zoom(&mut self) {
+        self.zoom = 1.0;
+        self.zoom_fit = true;
+        self.pan = egui::Vec2::ZERO;
     }
 }
