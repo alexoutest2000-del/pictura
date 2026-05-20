@@ -120,7 +120,7 @@ impl PicturaApp {
                         if ui.button("⛶").clicked() {
                             self.toggle_fullscreen(ctx);
                         }
-                        if ui.button("?").clicked() {
+                        if ui.button("ⓘ").clicked() {
                             self.show_help = !self.show_help;
                         }
                     },
@@ -170,7 +170,7 @@ impl PicturaApp {
                 ui.label("F           Fit to window");
                 ui.label("F11         Toggle fullscreen");
                 ui.label("Space       Start / stop slideshow");
-                ui.label("?           Show / hide this help");
+                ui.label("H           Show / hide this help");
                 ui.label("Esc / Q     Quit");
                 ui.separator();
                 ui.label(format!(
@@ -224,7 +224,7 @@ impl eframe::App for PicturaApp {
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                 }
             }
-            if i.key_pressed(egui::Key::Question) {
+            if i.key_pressed(egui::Key::H) {
                 self.show_help = !self.show_help;
             }
         });

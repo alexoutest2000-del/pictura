@@ -11,14 +11,14 @@ pub struct Config {
     pub viewer: ViewerConfig,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SlideshowConfig {
     /// Interval between slides in seconds (1–86400).
     #[serde(default = "default_slideshow_interval")]
     pub interval_seconds: u64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ViewerConfig {
     /// Zoom multiplier per scroll step.
     #[serde(default = "default_zoom_step")]

@@ -1,5 +1,4 @@
 use anyhow::{Context, Result};
-use image::GenericImageView;
 use std::path::Path;
 use walkdir::WalkDir;
 
@@ -59,22 +58,13 @@ pub fn decode_image(
     path: &Path,
     max_bytes: u64,
 ) -> Result<(image::DynamicImage, ImageInfo)> {
-    // Open and detect format from magic bytes (not extension)
-    let reader = image::io::Reader::open(path)
+    // Peek dimensions first (opens the file, reads header, closes)
+    let (width, height) = image::ImageReader::open(path)
         .with_context(|| format!("Failed to open '{}'", path.display()))?
         .with_guessed_format()
-        .with_context(|| format!("Unknown image format: '{}'", path.display()))?;
-
-    // Peek dimensions before decoding
-    let (width, height) = match reader.clone().into_dimensions() {
-        Ok(dims) => dims,
-        Err(_) => {
-            return Err(anyhow::anyhow!(
-                "Failed to read dimensions from '{}'",
-                path.display()
-            ));
-        }
-    };
+        .with_context(|| format!("Unknown image format: '{}'", path.display()))?
+        .into_dimensions()
+        .with_context(|| format!("Failed to read dimensions from '{}'", path.display()))?;
 
     // Memory budget guardrail
     let estimated_bytes = width as u64 * height as u64 * 4; // RGBA
@@ -89,8 +79,11 @@ pub fn decode_image(
         ));
     }
 
-    // Decode
-    let image = reader
+    // Re-open and decode (ImageReader consumes itself on into_dimensions)
+    let image = image::ImageReader::open(path)
+        .with_context(|| format!("Failed to re-open '{}'", path.display()))?
+        .with_guessed_format()
+        .with_context(|| format!("Unknown image format: '{}'", path.display()))?
         .decode()
         .with_context(|| format!("Failed to decode '{}' — file may be corrupted", path.display()))?;
 

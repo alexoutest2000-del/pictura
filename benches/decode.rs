@@ -9,11 +9,13 @@ fn bench_decode_png(c: &mut Criterion) {
     }
     c.bench_function("decode_png", |b| {
         b.iter(|| {
-            let reader = image::io::Reader::open(black_box(path))
+            let image = image::ImageReader::open(black_box(path))
                 .expect("open")
                 .with_guessed_format()
-                .expect("format");
-            let _ = reader.decode().expect("decode");
+                .expect("format")
+                .decode()
+                .expect("decode");
+            let _ = black_box(image);
         })
     });
 }
@@ -26,11 +28,13 @@ fn bench_decode_jpeg(c: &mut Criterion) {
     }
     c.bench_function("decode_jpeg", |b| {
         b.iter(|| {
-            let reader = image::io::Reader::open(black_box(path))
+            let image = image::ImageReader::open(black_box(path))
                 .expect("open")
                 .with_guessed_format()
-                .expect("format");
-            let _ = reader.decode().expect("decode");
+                .expect("format")
+                .decode()
+                .expect("decode");
+            let _ = black_box(image);
         })
     });
 }

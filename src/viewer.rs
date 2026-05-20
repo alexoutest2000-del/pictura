@@ -1,6 +1,5 @@
 use egui::{ColorImage, TextureHandle, TextureOptions};
 use std::path::Path;
-use std::time::Instant;
 
 use crate::loader;
 

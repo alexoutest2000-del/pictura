@@ -70,7 +70,7 @@ pictura
 | `F` | Fit to window (reset zoom) |
 | `F11` | Toggle fullscreen |
 | `Space` | Start / Stop slideshow |
-| `?` | Show keybindings overlay |
+| `H` | Show keybindings overlay |
 | `Esc` | Close overlay / Quit |
 
 ## Configuration
