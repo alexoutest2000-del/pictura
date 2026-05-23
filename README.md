@@ -27,23 +27,15 @@ cargo build --release
 
 That's it. No `apt install`, no system libraries, no C toolchain needed.
 
-## Requirements
+## Dependencies
 
-| What | Minimum |
-|---|---|
-| Rust | 1.75+ (install: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh`) |
-| OS | Linux with X11 or Wayland |
-| Disk | ~200MB for build artifacts |
+| Dependency | Version | Purpose | Install |
+|------------|---------|---------|---------|
+| Rust | 1.75+ | Compiler + cargo | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
+| OS | Linux | X11/Wayland display | Built-in |
+| Disk | ~200MB | Build artifacts | Built-in |
 
-No other dependencies. The binary bundles everything.
-
-## Installing Rust (if needed)
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-# Restart your shell or run: source "$HOME/.cargo/env"
-rustc --version  # should print 1.75+ or higher
-```
+No other dependencies — the binary bundles everything statically.
 
 ## Usage
 
